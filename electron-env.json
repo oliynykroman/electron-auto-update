@@ -1,0 +1,5 @@
+{
+  "environment": "local",
+  "remoteUrl": "https://updates.example.invalid/electron-update-demo/",
+  "manifestUrl": "https://updates.example.invalid/electron-update-demo/version.json"
+}

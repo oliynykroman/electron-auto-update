@@ -1,0 +1,45 @@
+<div class="app-shell">
+  <header class="app-bar">
+    <div class="app-identity">
+      <span class="app-mark" [class.is-checking]="checkState === 'checking'" aria-hidden="true"></span>
+      <span>Центр оновлення</span>
+    </div>
+    <span class="environment-badge">{{ environmentLabel }}</span>
+  </header>
+
+  <main class="page-shell">
+    <section class="version-card" aria-labelledby="version-heading">
+      <p class="eyebrow">Вебінтерфейс</p>
+      <h1 id="version-heading">Версія {{ webVersion }}</h1>
+
+      <dl class="runtime-details" *ngIf="runtimeInfo">
+        <div>
+          <dt>Джерело інтерфейсу</dt>
+          <dd>{{ sourceLabel }}</dd>
+        </div>
+        <div>
+          <dt>Середовище</dt>
+          <dd>{{ environmentLabel }}</dd>
+        </div>
+        <div>
+          <dt>Версія оболонки</dt>
+          <dd>{{ runtimeInfo.shellVersion }}</dd>
+        </div>
+      </dl>
+
+      <div class="status" [attr.data-state]="checkState" role="status" aria-live="polite">
+        <span class="status-dot" aria-hidden="true"></span>
+        <span>{{ message }}</span>
+      </div>
+
+      <div class="actions">
+        <button type="button" class="primary" (click)="checkForUpdate()" [disabled]="checkState === 'checking'">
+          {{ checkState === 'checking' ? 'Перевірка…' : 'Перевірити ще раз' }}
+        </button>
+        <button *ngIf="checkState === 'available'" type="button" class="secondary" (click)="reloadInterface()">
+          Застосувати оновлення
+        </button>
+      </div>
+    </section>
+  </main>
+</div>

@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "targets": {
+    "/": {
+      "targetKind": "existing-ui",
+      "projectId": "08839e81-32fb-452d-a4a9-7d81665875fc",
+      "baselineDraftId": "03b91136-22e8-46ec-83a2-28983aee2181",
+      "activeDraftId": "03b91136-22e8-46ec-83a2-28983aee2181",
+      "designSystemPath": ".superdesign/design-system.md",
+      "contextFiles": [
+        ".superdesign/design-system.md",
+        "src/app/app.component.html",
+        "src/app/app.component.scss",
+        "src/styles.scss",
+        "src/app/app.component.ts",
+        "src/app/electron-bridge.d.ts"
+      ],
+      "fingerprints": {
+        ".superdesign/design-system.md": "af0302619ee8a280fabf4a4fc093c3ae1e80c28db78489038cbed5ca4290cf0c",
+        "src/app/app.component.html": "97d0c2c893219a220cdc14347a362fa9275c16bc6f72fef740bc98e4f0f0ea60",
+        "src/app/app.component.scss": "de9694cf3d62943977dfbfe75ac5fa5c18966388b2d0827de5f8995c0b69869c",
+        "src/styles.scss": "446fe9520f98fcc602abc179f6fcf7b5b6d027b0a135442b7522c714cd87bc49",
+        "src/app/app.component.ts": "2fadd3b8b57136b9b382bb31a3ec2d35d593e5b4232d9b0dc06d75d69f94d1f4",
+        "src/app/electron-bridge.d.ts": "0c7e80dda64c7a5068c65858ea9d064fe4032a5a4bcf95db214e7e630c59a908"
+      },
+      "components": [],
+      "drafts": {
+        "03b91136-22e8-46ec-83a2-28983aee2181": {
+          "title": "Центр оновлення — український інтерфейс",
+          "visualDirection": "compact anonymous desktop utility inspired by the source application's operational UI",
+          "currentVersion": 3
+        }
+      },
+      "updatedAt": "2026-10-07T16:54:24Z"
+    }
+  }
+}
