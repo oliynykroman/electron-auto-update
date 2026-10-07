@@ -1,5 +1,5 @@
 {
-  "environment": "local",
+  "environment": "production",
   "remoteUrl": "https://oliynykroman.github.io/electron-auto-update/",
   "manifestUrl": "https://oliynykroman.github.io/electron-auto-update/version.json"
 }
