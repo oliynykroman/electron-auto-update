@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
 import { environment } from '../environments/environment';
 import { RuntimeInfo } from './electron-bridge';
 
@@ -16,6 +16,8 @@ export class AppComponent implements OnInit {
   latestVersion: string | null = null;
   checkState: CheckState = 'idle';
   message = 'Готово до перевірки новішої версії інтерфейсу.';
+
+  constructor(private readonly changeDetector: ChangeDetectorRef) {}
 
   get environmentLabel(): string {
     const labels: Record<string, string> = {
@@ -44,6 +46,8 @@ export class AppComponent implements OnInit {
     } catch (error) {
       this.checkState = 'error';
       this.message = error instanceof Error ? error.message : 'Не вдалося отримати інформацію про середовище.';
+    } finally {
+      this.changeDetector.detectChanges();
     }
   }
 
@@ -54,7 +58,11 @@ export class AppComponent implements OnInit {
     this.message = 'Перевіряємо наявність оновлення…';
 
     try {
-      const result = await window.updateDemo.checkForUpdate(this.webVersion);
+      const result = await this.withTimeout(
+        window.updateDemo.checkForUpdate(this.webVersion),
+        12_000,
+        'Сервер оновлень не відповів вчасно.',
+      );
       this.latestVersion = result.latestVersion;
       this.checkState = result.updateAvailable ? 'available' : 'current';
       this.message = result.updateAvailable
@@ -63,10 +71,28 @@ export class AppComponent implements OnInit {
     } catch (error) {
       this.checkState = 'error';
       this.message = error instanceof Error ? error.message : 'Не вдалося перевірити наявність оновлення.';
+    } finally {
+      this.changeDetector.detectChanges();
     }
   }
 
   async reloadInterface(): Promise<void> {
     await window.updateDemo?.reloadInterface();
+  }
+
+  private withTimeout<T>(promise: Promise<T>, milliseconds: number, message: string): Promise<T> {
+    return new Promise<T>((resolve, reject) => {
+      const timeout = window.setTimeout(() => reject(new Error(message)), milliseconds);
+      promise.then(
+        (value) => {
+          window.clearTimeout(timeout);
+          resolve(value);
+        },
+        (error) => {
+          window.clearTimeout(timeout);
+          reject(error);
+        },
+      );
+    });
   }
 }

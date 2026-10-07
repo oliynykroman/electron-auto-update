@@ -8,7 +8,7 @@
   "main": "electron/main.js",
   "scripts": {
     "start": "npm run start:local",
-    "start:local": "ng build --configuration local && node scripts/set-env.js local && electron .",
+    "start:local": "ng build --configuration local && node scripts/start-demo.js",
     "start:remote": "node scripts/set-env.js production && electron .",
     "start:web": "ng serve"
   },
