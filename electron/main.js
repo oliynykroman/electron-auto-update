@@ -5,9 +5,11 @@ const { compareVersions, validateHttpUrl } = require('./update-utils');
 
 const DEFAULT_CONFIG = {
   environment: 'development',
-  remoteUrl: 'https://updates.example.invalid/electron-update-demo/',
-  manifestUrl: 'https://updates.example.invalid/electron-update-demo/version.json',
+  remoteUrl: 'https://oliynykroman.github.io/electron-auto-update/',
+  manifestUrl: 'https://oliynykroman.github.io/electron-auto-update/version.json',
 };
+
+const interfaceSources = new Map();
 
 function readRuntimeConfig() {
   const configPath = app.isPackaged
@@ -30,9 +32,7 @@ function readRuntimeConfig() {
   };
 
   config.useRemote = ['staging', 'production'].includes(config.environment);
-  if (config.useRemote) {
-    config.remoteUrl = validateHttpUrl(config.remoteUrl, 'remoteUrl');
-  }
+  config.remoteUrl = validateHttpUrl(config.remoteUrl, 'remoteUrl');
   config.manifestUrl = validateHttpUrl(config.manifestUrl, 'manifestUrl');
 
   return config;
@@ -40,16 +40,18 @@ function readRuntimeConfig() {
 
 const runtimeConfig = readRuntimeConfig();
 
-async function loadInterface(window) {
-  if (runtimeConfig.useRemote) {
+async function loadInterface(window, forceRemote = false) {
+  if (runtimeConfig.useRemote || forceRemote) {
     await session.defaultSession.clearCache();
     const remoteUrl = new URL(runtimeConfig.remoteUrl);
     remoteUrl.searchParams.set('desktop-shell', app.getVersion());
     remoteUrl.searchParams.set('cache-bust', Date.now().toString());
+    interfaceSources.set(window.webContents.id, 'remote');
     await window.loadURL(remoteUrl.toString());
     return;
   }
 
+  interfaceSources.set(window.webContents.id, 'local');
   await window.loadFile(path.join(__dirname, '..', 'dist', 'electron-update-demo', 'index.html'));
 }
 
@@ -69,18 +71,21 @@ function createWindow() {
       sandbox: true,
     },
   });
+  const webContentsId = window.webContents.id;
 
   window.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
   window.webContents.on('will-navigate', (event, targetUrl) => {
     try {
-      const allowedUrl = runtimeConfig.useRemote
-        ? new URL(runtimeConfig.remoteUrl).origin
-        : 'file://';
       const targetOrigin = targetUrl.startsWith('file:') ? 'file://' : new URL(targetUrl).origin;
-      if (targetOrigin !== allowedUrl) event.preventDefault();
+      const allowedOrigins = new Set(['file://', new URL(runtimeConfig.remoteUrl).origin]);
+      if (!allowedOrigins.has(targetOrigin)) event.preventDefault();
     } catch {
       event.preventDefault();
     }
+  });
+
+  window.on('closed', () => {
+    interfaceSources.delete(webContentsId);
   });
 
   loadInterface(window).catch((error) => {
@@ -93,10 +98,10 @@ function createWindow() {
 }
 
 app.whenReady().then(() => {
-  ipcMain.handle('runtime-info', () => ({
+  ipcMain.handle('runtime-info', (event) => ({
     shellVersion: app.getVersion(),
     environment: runtimeConfig.environment,
-    source: runtimeConfig.useRemote ? 'remote' : 'local',
+    source: interfaceSources.get(event.sender.id) || (runtimeConfig.useRemote ? 'remote' : 'local'),
   }));
 
   ipcMain.handle('check-for-update', async (_event, currentVersion) => {
@@ -130,7 +135,7 @@ app.whenReady().then(() => {
 
   ipcMain.handle('reload-interface', async (event) => {
     const window = BrowserWindow.fromWebContents(event.sender);
-    if (window) await loadInterface(window);
+    if (window) await loadInterface(window, true);
   });
 
   createWindow();
